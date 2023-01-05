@@ -47,23 +47,21 @@ function limitaMensagens(messages, limit) {
   return limited_messages;
 }
 
-export function updateParticipants() {
-  db.collection("participants").find({}).toArray()
-    .then((participants) => {
-      verificaStatus(participants);
-    });
+export async function updateParticipants() {
+  const participants = await db.collection("participants").find({}).toArray();
+  await verificaStatus(participants);
 }
 
-function verificaStatus(participants) {
+async function verificaStatus(participants) {
   const now = Date.now();
   for (let participant of participants) {
     if ((now - participant.lastStatus) / 1000 > 10) {
-      removeParticipant(participant);
+      await removeParticipant(participant);
     }
   }
 }
 
-function removeParticipant(participant) {
+async function removeParticipant(participant) {
   const message = {
     from: participant.name,
     to: 'Todos',
@@ -72,8 +70,6 @@ function removeParticipant(participant) {
     time: dayjs().format("YYYY-MM-DDTHH:mm:ss")
   };
 
-  const promise = db.collection("participants").deleteOne({ _id: participant._id })
-  promise.then(() => {
-    return db.collection("messages").insertOne(message);
-  });
+  await db.collection("participants").deleteOne({ _id: participant._id });
+  await db.collection("messages").insertOne(message);
 }
