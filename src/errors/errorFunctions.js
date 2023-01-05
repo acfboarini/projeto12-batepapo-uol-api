@@ -5,8 +5,8 @@ const errorTypes = {
   422: "processable_entity"
 }
 
-export function errorMaker(code) {
-  if (errorTypes[code]) return { code, message: errorTypes[code] };
+export function errorMaker(code, message) {
+  if (errorTypes[code]) return { code, type: errorTypes[code], message };
 
   return { code: 500 };
 }
